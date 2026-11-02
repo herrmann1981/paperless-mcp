@@ -6,7 +6,7 @@ from paperless_mcp.paperless import PaperlessClient
 
 
 class EntityAPI:
-    """Common list, search, read, update, and delete operations."""
+    """Common list, search, read, create, update, and delete operations."""
 
     endpoint: str
     plural_name: str
@@ -36,6 +36,12 @@ class EntityAPI:
         """Fetch one entity record by its positive ID."""
         self._validate_id(item_id)
         return await self.client.request("GET", f"{self.endpoint}{item_id}/")
+
+    async def create(self, data: dict[str, Any]) -> dict[str, Any]:
+        """Create an entity record from the supplied Paperless API fields."""
+        if not data:
+            raise ValueError("data must contain at least one field")
+        return await self.client.request("POST", self.endpoint, json=data)
 
     async def update(self, item_id: int, updates: dict[str, Any]) -> dict[str, Any]:
         """Patch one entity record with the supplied fields."""

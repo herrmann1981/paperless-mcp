@@ -50,6 +50,15 @@ class TagsAPI(EntityAPI):
             return await entity.read(item_id)
 
         @server.tool(
+            description="Create a Paperless tag from the supplied fields.",
+            tags={"paperless", "tags", "create"},
+            icons=icons,
+        )
+        async def create_tag(data: dict[str, Any]) -> dict[str, Any]:
+            """Create a Paperless tag."""
+            return await entity.create(data)
+
+        @server.tool(
             description="Patch fields on a Paperless tag by ID.",
             tags={"paperless", "tags", "update"},
             icons=icons,

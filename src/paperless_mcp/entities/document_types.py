@@ -54,6 +54,15 @@ class DocumentTypesAPI(EntityAPI):
             return await entity.read(item_id)
 
         @server.tool(
+            description="Create a Paperless document type from the supplied fields.",
+            tags={"paperless", "document_types", "create"},
+            icons=icons,
+        )
+        async def create_document_type(data: dict[str, Any]) -> dict[str, Any]:
+            """Create a Paperless document type."""
+            return await entity.create(data)
+
+        @server.tool(
             description="Patch fields on a Paperless document type by ID.",
             tags={"paperless", "document_types", "update"},
             icons=icons,

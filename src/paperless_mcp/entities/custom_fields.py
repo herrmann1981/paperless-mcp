@@ -57,6 +57,17 @@ class CustomFieldsAPI(EntityAPI):
             return await entity.read(item_id)
 
         @server.tool(
+            description=(
+                "Create a Paperless custom-field definition from the supplied fields."
+            ),
+            tags={"paperless", "custom_fields", "create"},
+            icons=icons,
+        )
+        async def create_custom_field(data: dict[str, Any]) -> dict[str, Any]:
+            """Create a Paperless custom-field definition."""
+            return await entity.create(data)
+
+        @server.tool(
             description="Patch fields on a Paperless custom-field definition by ID.",
             tags={"paperless", "custom_fields", "update"},
             icons=icons,

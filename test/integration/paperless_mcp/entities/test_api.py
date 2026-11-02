@@ -5,6 +5,7 @@ import uuid
 import pytest
 
 from paperless_mcp.entities.custom_fields import CustomFieldsAPI
+from paperless_mcp.entities.document_types import DocumentTypesAPI
 from paperless_mcp.entities.documents import DocumentsAPI
 from paperless_mcp.entities.tags import TagsAPI
 from paperless_mcp.paperless import PaperlessClient
@@ -37,10 +38,8 @@ class TestPaperlessEntities:
         """Exercise tag creation, retrieval, update, search, and deletion."""
         tags = TagsAPI(paperless_service)
         tag_name = f"mcp-integration-{uuid.uuid4().hex}"
-        created = await paperless_service.request(
-            "POST",
-            "tags/",
-            json={
+        created = await tags.create(
+            {
                 "name": tag_name,
                 "color": "#a6cee3",
                 "is_inbox_tag": False,
@@ -70,10 +69,8 @@ class TestPaperlessEntities:
         """Exercise custom-field operations against the real Paperless API."""
         custom_fields = CustomFieldsAPI(paperless_service)
         field_name = f"mcp-integration-{uuid.uuid4().hex}"
-        created = await paperless_service.request(
-            "POST",
-            "custom_fields/",
-            json={"name": field_name, "data_type": "string"},
+        created = await custom_fields.create(
+            {"name": field_name, "data_type": "string"}
         )
         field_id = created["id"]
 
@@ -90,3 +87,23 @@ class TestPaperlessEntities:
             assert any(field["id"] == field_id for field in search_result["results"])
         finally:
             await custom_fields.delete(field_id, confirm=True)
+
+    @pytest.mark.anyio
+    async def test_document_type_create_read_update_delete_against_real_paperless(
+        self,
+        paperless_service: PaperlessClient,
+    ) -> None:
+        """Exercise document-type creation and management against Paperless."""
+        document_types = DocumentTypesAPI(paperless_service)
+        name = f"mcp-integration-{uuid.uuid4().hex}"
+        created = await document_types.create({"name": name})
+
+        try:
+            document_type = await document_types.read(created["id"])
+            assert document_type["name"] == name
+
+            updated_name = f"{name}-updated"
+            updated = await document_types.update(created["id"], {"name": updated_name})
+            assert updated["name"] == updated_name
+        finally:
+            await document_types.delete(created["id"], confirm=True)

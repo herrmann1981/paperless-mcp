@@ -93,21 +93,25 @@ Keep `.env` local and do not put API keys directly in the command arguments.
 | `list_tags` | List tags. |
 | `search_tags` | Search tags. |
 | `read_tag` | Read a tag by ID. |
+| `create_tag` | Create a tag from Paperless API fields. |
 | `update_tag` | Update a tag by ID. |
 | `delete_tag` | Delete a tag by ID; requires `confirm=true`. |
 | `list_document_types` | List document types. |
 | `search_document_types` | Search document types. |
 | `read_document_type` | Read a document type by ID. |
+| `create_document_type` | Create a document type from Paperless API fields. |
 | `update_document_type` | Update a document type by ID. |
 | `delete_document_type` | Delete a document type by ID; requires `confirm=true`. |
 | `list_storage_paths` | List storage paths. |
 | `search_storage_paths` | Search storage paths. |
 | `read_storage_path` | Read a storage path by ID. |
+| `create_storage_path` | Create a storage path from Paperless API fields. |
 | `update_storage_path` | Update a storage path by ID. |
 | `delete_storage_path` | Delete a storage path by ID; requires `confirm=true`. |
 | `list_custom_fields` | List Paperless custom-field definitions. |
 | `search_custom_fields` | Search Paperless custom-field definitions. |
 | `read_custom_field` | Read a custom-field definition by ID. |
+| `create_custom_field` | Create a custom-field definition from Paperless API fields. |
 | `update_custom_field` | Update a custom-field definition by ID. |
 | `delete_custom_field` | Delete a custom-field definition by ID; requires `confirm=true`. |
 
@@ -116,6 +120,9 @@ limited to 100. Search tools take a `query` parameter. Update tools accept an
 `updates` object, which is sent as a Paperless API PATCH request. Bulk document
 updates and deletes take explicit ID lists and process IDs one at a time, so
 earlier changes may already have succeeded if a later request fails.
+Create tools accept a `data` object containing fields supported by the
+corresponding Paperless API endpoint. Document creation is a separate file
+upload workflow and is not exposed as a JSON entity-creation tool.
 
 Entity-specific API operations and MCP tool registration are organized in
 `src/paperless_mcp/entities/`: `documents.py`, `tags.py`,

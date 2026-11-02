@@ -107,6 +107,35 @@ class TestEntityAPI:
 
         assert result["name"] == "Invoices"
 
+    def test_create_uses_post_and_provided_fields(self) -> None:
+        """Create an entity using the JSON fields supplied by the caller."""
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            """Validate the create request and return the new entity."""
+            assert request.method == "POST"
+            assert request.url.path == "/api/documents/"
+            assert json.loads(request.content) == {"title": "New document"}
+            return httpx.Response(201, json={"id": 12, "title": "New document"})
+
+        service, client, _ = make_service(handler)
+        try:
+            result = run(service.create({"title": "New document"}))
+        finally:
+            run(client.close())
+
+        assert result == {"id": 12, "title": "New document"}
+
+    def test_create_rejects_empty_data_without_request(self) -> None:
+        """Require at least one field before sending a create request."""
+        service, client, requests = make_service(
+            lambda request: httpx.Response(201, json={})
+        )
+        try:
+            with pytest.raises(ValueError, match="at least one field"):
+                run(service.create({}))
+        finally:
+            run(client.close())
+
     def test_delete_requires_confirmation_without_request(self) -> None:
         """Refuse an unconfirmed delete before making an HTTP request."""
         service, client, requests = make_service(lambda request: httpx.Response(204))

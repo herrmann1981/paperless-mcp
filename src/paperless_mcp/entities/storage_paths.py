@@ -54,6 +54,15 @@ class StoragePathsAPI(EntityAPI):
             return await entity.read(item_id)
 
         @server.tool(
+            description="Create a Paperless storage path from the supplied fields.",
+            tags={"paperless", "storage_paths", "create"},
+            icons=icons,
+        )
+        async def create_storage_path(data: dict[str, Any]) -> dict[str, Any]:
+            """Create a Paperless storage path."""
+            return await entity.create(data)
+
+        @server.tool(
             description="Patch fields on a Paperless storage path by ID.",
             tags={"paperless", "storage_paths", "update"},
             icons=icons,
