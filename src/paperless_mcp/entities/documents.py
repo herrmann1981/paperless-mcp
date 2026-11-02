@@ -1,0 +1,167 @@
+"""Document-specific Paperless API operations."""
+
+from collections.abc import Sequence
+from typing import Any
+
+from fastmcp import FastMCP
+
+from paperless_mcp.entities.base import EntityAPI
+from paperless_mcp.icons import load_entity_icons
+from paperless_mcp.paperless import PaperlessAPIError, PaperlessClient
+
+
+class BulkOperationError(RuntimeError):
+    """A bulk operation stopped after one or more successful requests."""
+
+    def __init__(
+        self,
+        operation: str,
+        completed_ids: list[int],
+        failed_id: int,
+        cause: PaperlessAPIError,
+    ) -> None:
+        """Record completed IDs and the API error that stopped a bulk action."""
+        self.completed_ids = completed_ids
+        self.failed_id = failed_id
+        super().__init__(
+            f"Bulk {operation} stopped at ID {failed_id}; "
+            f"completed IDs: {completed_ids}; error: {cause}"
+        )
+
+
+class DocumentsAPI(EntityAPI):
+    """Document API operations, including selected-ID bulk actions."""
+
+    endpoint = "documents/"
+    plural_name = "documents"
+    singular_name = "document"
+
+    def __init__(self, client: PaperlessClient) -> None:
+        """Initialize document operations with the shared API client."""
+        super().__init__(client)
+
+    async def bulk_update(
+        self, document_ids: Sequence[int], updates: dict[str, Any]
+    ) -> dict[str, list[int]]:
+        """Update selected documents sequentially and report completed IDs."""
+        ids = self._validate_ids(document_ids)
+        if not updates:
+            raise ValueError("updates must contain at least one field")
+        completed: list[int] = []
+        for document_id in ids:
+            try:
+                await self.update(document_id, updates)
+            except PaperlessAPIError as exc:
+                raise BulkOperationError("update", completed, document_id, exc) from exc
+            completed.append(document_id)
+        return {"updated_ids": completed}
+
+    async def bulk_delete(
+        self, document_ids: Sequence[int], confirm: bool
+    ) -> dict[str, list[int]]:
+        """Delete selected documents sequentially after explicit confirmation."""
+        ids = self._validate_ids(document_ids)
+        if not confirm:
+            raise ValueError("Set confirm=true to delete these documents")
+        completed: list[int] = []
+        for document_id in ids:
+            try:
+                await self.delete(document_id, confirm=True)
+            except PaperlessAPIError as exc:
+                raise BulkOperationError("delete", completed, document_id, exc) from exc
+            completed.append(document_id)
+        return {"deleted_ids": completed}
+
+    def register_tools(self, server: FastMCP) -> None:
+        """Register document tools with descriptions, tags, and Paperless icons."""
+        entity = self
+        icons = load_entity_icons("documents")
+
+        @server.tool(
+            description="List Paperless documents, with page and page_size controls.",
+            tags={"paperless", "documents", "list"},
+            icons=icons,
+        )
+        async def list_documents(page: int = 1, page_size: int = 25) -> dict[str, Any]:
+            """List Paperless documents with pagination."""
+            return await entity.list(page=page, page_size=page_size)
+
+        @server.tool(
+            description="Search Paperless documents by text with pagination.",
+            tags={"paperless", "documents", "search"},
+            icons=icons,
+        )
+        async def search_documents(
+            query: str, page: int = 1, page_size: int = 25
+        ) -> dict[str, Any]:
+            """Search Paperless documents by query."""
+            return await entity.list(search=query, page=page, page_size=page_size)
+
+        @server.tool(
+            description="Fetch a Paperless document by its numeric ID.",
+            tags={"paperless", "documents", "read"},
+            icons=icons,
+        )
+        async def read_document(item_id: int) -> dict[str, Any]:
+            """Read a Paperless document by ID."""
+            return await entity.read(item_id)
+
+        @server.tool(
+            description="Patch fields on a Paperless document by ID.",
+            tags={"paperless", "documents", "update"},
+            icons=icons,
+        )
+        async def update_document(
+            item_id: int, updates: dict[str, Any]
+        ) -> dict[str, Any]:
+            """Update Paperless document fields by ID."""
+            return await entity.update(item_id, updates)
+
+        @server.tool(
+            description="Delete a document by ID; requires confirm=true.",
+            tags={"paperless", "documents", "delete"},
+            icons=icons,
+        )
+        async def delete_document(item_id: int, confirm: bool = False) -> Any:
+            """Delete a document only when confirm is true."""
+            return await entity.delete(item_id, confirm)
+
+        @server.tool(
+            description=(
+                "Patch selected document IDs sequentially. If an API request fails, "
+                "the result reports IDs already updated."
+            ),
+            tags={"paperless", "documents", "bulk", "update"},
+            icons=icons,
+        )
+        async def bulk_update_documents(
+            document_ids: list[int], updates: dict[str, Any]
+        ) -> dict[str, list[int]]:
+            """Update selected documents; earlier IDs may succeed before a failure."""
+            return await entity.bulk_update(document_ids, updates)
+
+        @server.tool(
+            description=(
+                "Delete selected document IDs sequentially; requires confirm=true. "
+                "If a request fails, the result reports IDs already deleted."
+            ),
+            tags={"paperless", "documents", "bulk", "delete"},
+            icons=icons,
+        )
+        async def bulk_delete_documents(
+            document_ids: list[int], confirm: bool = False
+        ) -> dict[str, list[int]]:
+            """Delete selected documents; requires confirm=true."""
+            return await entity.bulk_delete(document_ids, confirm)
+
+    @classmethod
+    def _validate_ids(cls, item_ids: Sequence[int]) -> list[int]:
+        """Validate a non-empty sequence of unique positive document IDs."""
+        ids = list(item_ids)
+        if not ids:
+            raise ValueError("At least one ID must be provided")
+        for item_id in ids:
+            cls._validate_id(item_id)
+        if len(set(ids)) != len(ids):
+            raise ValueError("IDs must not contain duplicates")
+        return ids

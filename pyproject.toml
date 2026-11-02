@@ -1,0 +1,40 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "paperless-mcp"
+version = "0.1.0"
+description = "A FastMCP server for the Paperless-ngx API"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastmcp>=2.0",
+    "httpx>=0.27",
+]
+
+[project.scripts]
+paperless-mcp = "paperless_mcp.server:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/paperless_mcp"]
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
+addopts = "-m 'not integration'"
+markers = [
+    "integration: requires Docker and a running Paperless-ngx test stack",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
