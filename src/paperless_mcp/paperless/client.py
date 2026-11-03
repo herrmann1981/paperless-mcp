@@ -11,18 +11,23 @@ logger = logging.getLogger(__name__)
 
 
 class PaperlessAPIError(RuntimeError):
-    """An error returned by the Paperless API."""
+    """Raised when the Paperless API returns an error or cannot be reached."""
 
 
 class PaperlessClient:
-    """Small async client that centralizes authentication and API errors."""
+    """Async HTTP client that centralizes Paperless authentication and errors."""
 
     def __init__(
         self,
         settings: Settings,
         transport: httpx.AsyncBaseTransport | None = None,
     ) -> None:
-        """Create an authenticated async client for the Paperless API."""
+        """Create an authenticated async client for the Paperless API.
+
+        Args:
+            settings: Server configuration including the base URL and API token.
+            transport: Optional custom HTTP transport for testing or mocking.
+        """
         self._http = httpx.AsyncClient(
             base_url=f"{settings.base_url}/api/",
             headers={"Authorization": f"Token {settings.api_key}"},
@@ -35,7 +40,20 @@ class PaperlessClient:
         await self._http.aclose()
 
     async def request(self, method: str, endpoint: str, **kwargs: Any) -> Any:
-        """Make an API request and return its decoded JSON response."""
+        """Make an API request and return a decoded JSON response.
+
+        Args:
+            method: HTTP method to use, such as GET or PATCH.
+            endpoint: Relative API endpoint path, such as documents/.
+            **kwargs: Additional keyword arguments forwarded to httpx.
+
+        Returns:
+            Any: Parsed JSON response body or None when the server responds with 204.
+
+        Raises:
+            PaperlessAPIError: If the request receives a non-success status or a
+                transport-level failure.
+        """
         try:
             response = await self._http.request(method, endpoint, **kwargs)
             response.raise_for_status()
@@ -71,7 +89,19 @@ class PaperlessClient:
         return response.json()
 
     async def request_bytes(self, method: str, endpoint: str) -> bytes:
-        """Make an API request and return its raw response body."""
+        """Make an API request and return its raw response body.
+
+        Args:
+            method: HTTP method to use, typically GET for file downloads.
+            endpoint: Relative API endpoint path to fetch.
+
+        Returns:
+            bytes: Response payload as raw binary data.
+
+        Raises:
+            PaperlessAPIError: If the request receives a non-success status or a
+                transport-level failure.
+        """
         try:
             response = await self._http.request(method, endpoint)
             response.raise_for_status()
