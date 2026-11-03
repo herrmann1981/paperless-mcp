@@ -2,6 +2,9 @@
 
 import asyncio
 import logging
+from importlib.metadata import version
+
+import pytest
 
 from paperless_mcp import __version__
 from paperless_mcp.config import Settings
@@ -9,6 +12,26 @@ from paperless_mcp.server import create_server
 
 
 class TestServer:
+    def test_server_lifespan_closes_paperless_client(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Close the shared HTTP client when the FastMCP server shuts down."""
+        closed = False
+
+        class FakeClient:
+            async def close(self) -> None:
+                nonlocal closed
+                closed = True
+
+        monkeypatch.setattr("paperless_mcp.server.PaperlessClient", lambda _: FakeClient())
+        server = create_server(Settings("http://paperless.test", "test-token"))
+
+        async def run_lifespan() -> None:
+            async with server._lifespan_manager():
+                assert not closed
+
+        asyncio.run(run_lifespan())
+
+        assert closed
+
     def test_registers_tools_for_all_resources_and_document_bulk_operations(
         self,
     ) -> None:
@@ -115,6 +138,7 @@ class TestServer:
         """Expose the package version and both packaged server icon themes."""
         server = create_server(Settings("http://paperless.test", "test-token"))
 
+        assert __version__ == version("paperless-mcp")
         assert server.version == __version__
         assert "custom-field definitions" in server.instructions
         assert {icon.theme for icon in server.icons} == {"light", "dark"}
