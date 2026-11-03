@@ -5,9 +5,9 @@ Paperless-ngx API tools over stdio.
 
 The server connects to an existing Paperless-ngx instance using its REST API.
 It supports document search and metadata management, document PDF downloads,
-and management of tags, document types, storage paths, and custom-field
-definitions. It does not host Paperless-ngx or create documents from uploaded
-files.
+and management of tags, correspondents, document types, storage paths, and
+custom-field definitions. It does not host Paperless-ngx or create documents
+from uploaded files.
 
 ## Configuration
 
@@ -135,6 +135,17 @@ resolver. Published images are available as
 | `update_tag` | Update a tag by ID. |
 | `delete_tag` | Delete a tag by ID; requires `confirm=true`. |
 
+### Correspondents
+
+| Tool | Description |
+|---|---|
+| `list_correspondents` | List correspondents. |
+| `search_correspondents` | Search correspondents. |
+| `read_correspondent` | Read a correspondent by ID. |
+| `create_correspondent` | Create a correspondent from Paperless API fields. |
+| `update_correspondent` | Update a correspondent by ID. |
+| `delete_correspondent` | Delete a correspondent by ID; requires `confirm=true`. |
+
 ### Document types
 
 | Tool | Description |
@@ -237,6 +248,7 @@ src/paperless_mcp/
     base.py                 Shared list, read, create, update, and delete logic
     documents.py            Document tools, PDF download, and bulk operations
     tags.py                 Tag tools
+    correspondents.py       Correspondent tools
     document_types.py       Document-type tools
     storage_paths.py        Storage-path tools
     custom_fields.py        Custom-field definition tools

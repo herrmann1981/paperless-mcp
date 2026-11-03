@@ -9,6 +9,7 @@ from fastmcp import FastMCP
 from mcp.types import EmbeddedResource
 
 from paperless_mcp.config import Settings
+from paperless_mcp.entities.correspondents import CorrespondentsAPI
 from paperless_mcp.entities.custom_fields import CustomFieldsAPI
 from paperless_mcp.entities.documents import BulkOperationError, DocumentsAPI
 from paperless_mcp.entities.tags import TagsAPI
@@ -37,6 +38,26 @@ def make_service(handler, api_type=DocumentsAPI):
 
 
 class TestEntityAPI:
+    def test_correspondents_use_the_correspondents_endpoint(self) -> None:
+        """List and search correspondents through Paperless's API endpoint."""
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            """Verify correspondent endpoint and search parameters."""
+            assert request.method == "GET"
+            assert request.url.path == "/api/correspondents/"
+            assert request.url.params["search"] == "Acme"
+            assert request.url.params["page"] == "2"
+            assert request.url.params["page_size"] == "5"
+            return httpx.Response(200, json={"results": [{"id": 8, "name": "Acme"}]})
+
+        service, client, _ = make_service(handler, CorrespondentsAPI)
+        try:
+            result = run(service.list(search="Acme", page=2, page_size=5))
+        finally:
+            run(client.close())
+
+        assert result == {"results": [{"id": 8, "name": "Acme"}]}
+
     def test_list_defaults_to_maximum_page_size(self) -> None:
         """Use page size 100 when a caller does not specify it."""
 

@@ -42,7 +42,8 @@ def create_server(settings: Settings | None = None) -> FastMCP:
     server = FastMCP(
         name="paperless",
         instructions=(
-            "Search and manage Paperless documents, tags, document types, storage paths, and custom-field definitions."
+            "Search and manage Paperless documents, tags, correspondents, document "
+            "types, storage paths, and custom-field definitions."
         ),
         version=__version__,
         icons=load_server_icons(),

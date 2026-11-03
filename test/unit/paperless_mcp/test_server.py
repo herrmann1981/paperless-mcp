@@ -52,6 +52,12 @@ class TestServer:
             "read_tag",
             "update_tag",
             "delete_tag",
+            "list_correspondents",
+            "search_correspondents",
+            "read_correspondent",
+            "create_correspondent",
+            "update_correspondent",
+            "delete_correspondent",
             "list_document_types",
             "search_document_types",
             "read_document_type",
@@ -93,6 +99,8 @@ class TestServer:
             "search_documents",
             "list_tags",
             "search_tags",
+            "list_correspondents",
+            "search_correspondents",
             "list_document_types",
             "search_document_types",
             "list_storage_paths",
@@ -112,6 +120,7 @@ class TestServer:
         for entity in (
             "documents",
             "tags",
+            "correspondents",
             "document_types",
             "storage_paths",
             "custom_fields",
@@ -122,7 +131,7 @@ class TestServer:
             assert len(sources) == 1
             entity_icon_sources[entity] = next(iter(sources))
 
-        assert len(set(entity_icon_sources.values())) == 5
+        assert len(set(entity_icon_sources.values())) == 6
 
     def test_server_configures_logging_from_settings(self) -> None:
         """Apply the configured log level when building the MCP server."""
@@ -140,6 +149,7 @@ class TestServer:
 
         assert __version__ == version("paperless-mcp")
         assert server.version == __version__
+        assert "correspondents" in server.instructions
         assert "custom-field definitions" in server.instructions
         assert {icon.theme for icon in server.icons} == {"light", "dark"}
         assert all(icon.mime_type == "image/svg+xml" for icon in server.icons)

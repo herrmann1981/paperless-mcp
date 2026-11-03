@@ -4,6 +4,7 @@ import uuid
 
 import pytest
 
+from paperless_mcp.entities.correspondents import CorrespondentsAPI
 from paperless_mcp.entities.custom_fields import CustomFieldsAPI
 from paperless_mcp.entities.document_types import DocumentTypesAPI
 from paperless_mcp.entities.documents import DocumentsAPI
@@ -14,6 +15,29 @@ pytestmark = pytest.mark.integration
 
 
 class TestPaperlessEntities:
+    @pytest.mark.anyio
+    async def test_correspondent_create_read_update_search_delete_against_real_paperless(
+        self,
+        paperless_service: PaperlessClient,
+    ) -> None:
+        """Exercise correspondent CRUD and search against the real Paperless API."""
+        correspondents = CorrespondentsAPI(paperless_service)
+        name = f"mcp-integration-{uuid.uuid4().hex}"
+        created = await correspondents.create({"name": name})
+
+        try:
+            correspondent = await correspondents.read(created["id"])
+            assert correspondent["name"] == name
+
+            updated_name = f"{name}-updated"
+            updated = await correspondents.update(created["id"], {"name": updated_name})
+            assert updated["name"] == updated_name
+
+            search_result = await correspondents.list(search=updated_name, page_size=5)
+            assert any(item["id"] == created["id"] for item in search_result["results"])
+        finally:
+            await correspondents.delete(created["id"], confirm=True)
+
     @pytest.mark.anyio
     async def test_document_list_and_search_use_real_paperless(
         self,

@@ -6,7 +6,7 @@ from typing import Literal
 
 from mcp.types import Icon
 
-EntityName = Literal["documents", "tags", "document_types", "storage_paths", "custom_fields"]
+EntityName = Literal["documents", "tags", "document_types", "storage_paths", "custom_fields", "correspondents"]
 
 
 def _load_icons(asset_prefix: str) -> list[Icon]:
