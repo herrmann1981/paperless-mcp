@@ -6,9 +6,7 @@ from typing import Literal
 
 from mcp.types import Icon
 
-EntityName = Literal[
-    "documents", "tags", "document_types", "storage_paths", "custom_fields"
-]
+EntityName = Literal["documents", "tags", "document_types", "storage_paths", "custom_fields"]
 
 
 def _load_icons(asset_prefix: str) -> list[Icon]:
@@ -25,9 +23,7 @@ def _load_icons(asset_prefix: str) -> list[Icon]:
     for theme in ("light", "dark"):
         image = assets.joinpath(f"{asset_prefix}-{theme}.svg").read_bytes()
         source = f"data:image/svg+xml;base64,{b64encode(image).decode('ascii')}"
-        icons.append(
-            Icon(src=source, mimeType="image/svg+xml", sizes=["any"], theme=theme)
-        )
+        icons.append(Icon(src=source, mimeType="image/svg+xml", sizes=["any"], theme=theme))
     return icons
 
 

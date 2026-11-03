@@ -22,9 +22,7 @@ class TestPaperlessEntities:
         """Verify document listing and search against the running Paperless API."""
         documents = DocumentsAPI(paperless_service)
         result = await documents.list(page_size=5)
-        search_result = await documents.list(
-            search=f"mcp-integration-{uuid.uuid4().hex}", page_size=5
-        )
+        search_result = await documents.list(search=f"mcp-integration-{uuid.uuid4().hex}", page_size=5)
 
         assert {"count", "results"} <= result.keys()
         assert isinstance(result["results"], list)
@@ -69,9 +67,7 @@ class TestPaperlessEntities:
         """Exercise custom-field operations against the real Paperless API."""
         custom_fields = CustomFieldsAPI(paperless_service)
         field_name = f"mcp-integration-{uuid.uuid4().hex}"
-        created = await custom_fields.create(
-            {"name": field_name, "data_type": "string"}
-        )
+        created = await custom_fields.create({"name": field_name, "data_type": "string"})
         field_id = created["id"]
 
         try:

@@ -95,9 +95,7 @@ class EntityAPI:
         self._validate_id(item_id)
         if not updates:
             raise ValueError("updates must contain at least one field")
-        return await self.client.request(
-            "PATCH", f"{self.endpoint}{item_id}/", json=updates
-        )
+        return await self.client.request("PATCH", f"{self.endpoint}{item_id}/", json=updates)
 
     async def delete(self, item_id: int, confirm: bool) -> dict[str, Any] | None:
         """Delete one entity record after explicit confirmation.

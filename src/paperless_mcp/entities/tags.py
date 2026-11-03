@@ -46,9 +46,7 @@ class TagsAPI(EntityAPI):
             tags={"paperless", "tags", "search"},
             icons=icons,
         )
-        async def search_tags(
-            query: str, page: int = 1, page_size: int = 100
-        ) -> dict[str, Any]:
+        async def search_tags(query: str, page: int = 1, page_size: int = 100) -> dict[str, Any]:
             """Search Paperless tags by query.
 
             Args:

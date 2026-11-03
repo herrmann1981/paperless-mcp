@@ -63,9 +63,7 @@ class TestServer:
             assert "paperless" in tool.tags
             assert {icon.theme for icon in tool.icons} == {"light", "dark"}
 
-        assert "documents" in next(
-            tool.tags for tool in tools if tool.name == "bulk_delete_documents"
-        )
+        assert "documents" in next(tool.tags for tool in tools if tool.name == "bulk_delete_documents")
 
         for tool_name in (
             "list_documents",
@@ -97,9 +95,7 @@ class TestServer:
         ):
             matching_tools = [tool for tool in tools if entity in tool.tags]
             assert matching_tools
-            sources = {
-                tuple(icon.src for icon in tool.icons) for tool in matching_tools
-            }
+            sources = {tuple(icon.src for icon in tool.icons) for tool in matching_tools}
             assert len(sources) == 1
             entity_icon_sources[entity] = next(iter(sources))
 
@@ -123,6 +119,4 @@ class TestServer:
         assert "custom-field definitions" in server.instructions
         assert {icon.theme for icon in server.icons} == {"light", "dark"}
         assert all(icon.mime_type == "image/svg+xml" for icon in server.icons)
-        assert all(
-            icon.src.startswith("data:image/svg+xml;base64,") for icon in server.icons
-        )
+        assert all(icon.src.startswith("data:image/svg+xml;base64,") for icon in server.icons)

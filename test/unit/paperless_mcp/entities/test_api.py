@@ -81,9 +81,7 @@ class TestEntityAPI:
 
     def test_download_rejects_non_pdf_response(self) -> None:
         """Reject a successful HTTP response that does not contain a PDF."""
-        service, client, requests = make_service(
-            lambda request: httpx.Response(200, content=b"not a PDF")
-        )
+        service, client, requests = make_service(lambda request: httpx.Response(200, content=b"not a PDF"))
         try:
             with pytest.raises(PaperlessAPIError, match="is not a PDF"):
                 run(service.download(7))
@@ -94,9 +92,7 @@ class TestEntityAPI:
 
     def test_download_rejects_invalid_id_without_request(self) -> None:
         """Reject non-positive document IDs before attempting a download."""
-        service, client, requests = make_service(
-            lambda request: httpx.Response(200, content=b"%PDF-1.7")
-        )
+        service, client, requests = make_service(lambda request: httpx.Response(200, content=b"%PDF-1.7"))
         try:
             with pytest.raises(ValueError, match="positive"):
                 run(service.download(0))
@@ -197,9 +193,7 @@ class TestEntityAPI:
 
     def test_create_rejects_empty_data_without_request(self) -> None:
         """Require at least one field before sending a create request."""
-        service, client, requests = make_service(
-            lambda request: httpx.Response(201, json={})
-        )
+        service, client, requests = make_service(lambda request: httpx.Response(201, json={}))
         try:
             with pytest.raises(ValueError, match="at least one field"):
                 run(service.create({}))
@@ -259,9 +253,7 @@ class TestEntityAPI:
     @pytest.mark.parametrize("page_size", [0, 1001])
     def test_list_rejects_out_of_range_page_size(self, page_size: int) -> None:
         """Reject invalid page sizes before attempting a Paperless request."""
-        service, client, requests = make_service(
-            lambda request: httpx.Response(200, json={})
-        )
+        service, client, requests = make_service(lambda request: httpx.Response(200, json={}))
         try:
             with pytest.raises(ValueError, match="page_size"):
                 run(service.list(page_size=page_size))
@@ -273,9 +265,7 @@ class TestEntityAPI:
     @pytest.mark.parametrize("page", [0, -1])
     def test_list_rejects_invalid_page(self, page: int) -> None:
         """Reject invalid page numbers before making a request."""
-        service, client, requests = make_service(
-            lambda request: httpx.Response(200, json={})
-        )
+        service, client, requests = make_service(lambda request: httpx.Response(200, json={}))
         try:
             with pytest.raises(ValueError, match="page"):
                 run(service.list(page=page))
@@ -287,9 +277,7 @@ class TestEntityAPI:
     @pytest.mark.parametrize("item_id", [0, -1])
     def test_read_rejects_invalid_id(self, item_id: int) -> None:
         """Reject non-positive IDs before making a request."""
-        service, client, requests = make_service(
-            lambda request: httpx.Response(200, json={})
-        )
+        service, client, requests = make_service(lambda request: httpx.Response(200, json={}))
         try:
             with pytest.raises(ValueError, match="positive"):
                 run(service.read(item_id))
@@ -300,9 +288,7 @@ class TestEntityAPI:
 
     def test_update_rejects_empty_updates_without_request(self) -> None:
         """Require update payloads to contain at least one field."""
-        service, client, requests = make_service(
-            lambda request: httpx.Response(200, json={})
-        )
+        service, client, requests = make_service(lambda request: httpx.Response(200, json={}))
         try:
             with pytest.raises(ValueError, match="at least one field"):
                 run(service.update(1, {}))
@@ -320,14 +306,10 @@ class TestEntityAPI:
             run(client.close())
 
         assert result is None
-        assert [(request.method, request.url.path) for request in requests] == [
-            ("DELETE", "/api/documents/3/")
-        ]
+        assert [(request.method, request.url.path) for request in requests] == [("DELETE", "/api/documents/3/")]
 
     @pytest.mark.parametrize("document_ids", [[], [1, 1], [0]])
-    def test_bulk_delete_rejects_invalid_ids_without_requests(
-        self, document_ids: list[int]
-    ) -> None:
+    def test_bulk_delete_rejects_invalid_ids_without_requests(self, document_ids: list[int]) -> None:
         """Reject empty, duplicate, and non-positive bulk-delete IDs."""
         service, client, requests = make_service(lambda request: httpx.Response(204))
         try:
@@ -354,9 +336,7 @@ class TestEntityAPI:
         message: str,
     ) -> None:
         """Validate bulk update inputs before making any partial changes."""
-        service, client, requests = make_service(
-            lambda request: httpx.Response(200, json={})
-        )
+        service, client, requests = make_service(lambda request: httpx.Response(200, json={}))
         try:
             with pytest.raises(ValueError, match=message):
                 run(service.bulk_update(document_ids, updates))

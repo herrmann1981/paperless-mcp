@@ -25,16 +25,11 @@ class CustomFieldsAPI(EntityAPI):
         icons = load_entity_icons("custom_fields")
 
         @server.tool(
-            description=(
-                "List Paperless custom-field definitions, with page and "
-                "page_size controls."
-            ),
+            description=("List Paperless custom-field definitions, with page and page_size controls."),
             tags={"paperless", "custom_fields", "list"},
             icons=icons,
         )
-        async def list_custom_fields(
-            page: int = 1, page_size: int = 100
-        ) -> dict[str, Any]:
+        async def list_custom_fields(page: int = 1, page_size: int = 100) -> dict[str, Any]:
             """List Paperless custom-field definitions with pagination.
 
             Args:
@@ -47,15 +42,11 @@ class CustomFieldsAPI(EntityAPI):
             return await entity.list(page=page, page_size=page_size)
 
         @server.tool(
-            description=(
-                "Search Paperless custom-field definitions by text with pagination."
-            ),
+            description=("Search Paperless custom-field definitions by text with pagination."),
             tags={"paperless", "custom_fields", "search"},
             icons=icons,
         )
-        async def search_custom_fields(
-            query: str, page: int = 1, page_size: int = 100
-        ) -> dict[str, Any]:
+        async def search_custom_fields(query: str, page: int = 1, page_size: int = 100) -> dict[str, Any]:
             """Search Paperless custom-field definitions by query.
 
             Args:
@@ -85,9 +76,7 @@ class CustomFieldsAPI(EntityAPI):
             return await entity.read(item_id)
 
         @server.tool(
-            description=(
-                "Create a Paperless custom-field definition from the supplied fields."
-            ),
+            description=("Create a Paperless custom-field definition from the supplied fields."),
             tags={"paperless", "custom_fields", "create"},
             icons=icons,
         )
@@ -107,9 +96,7 @@ class CustomFieldsAPI(EntityAPI):
             tags={"paperless", "custom_fields", "update"},
             icons=icons,
         )
-        async def update_custom_field(
-            item_id: int, updates: dict[str, Any]
-        ) -> dict[str, Any]:
+        async def update_custom_field(item_id: int, updates: dict[str, Any]) -> dict[str, Any]:
             """Update Paperless custom-field definition fields by ID.
 
             Args:
@@ -122,9 +109,7 @@ class CustomFieldsAPI(EntityAPI):
             return await entity.update(item_id, updates)
 
         @server.tool(
-            description=(
-                "Delete a custom-field definition by ID; requires confirm=true."
-            ),
+            description=("Delete a custom-field definition by ID; requires confirm=true."),
             tags={"paperless", "custom_fields", "delete"},
             icons=icons,
         )

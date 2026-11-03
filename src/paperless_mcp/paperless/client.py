@@ -67,9 +67,7 @@ class PaperlessClient:
                 status_code,
             )
             message = exc.response.text[:500]
-            raise PaperlessAPIError(
-                f"Paperless API request failed with status {status_code}: {message}"
-            ) from exc
+            raise PaperlessAPIError(f"Paperless API request failed with status {status_code}: {message}") from exc
         except httpx.RequestError as exc:
             logger.error(
                 "Paperless API request failed: %s %s could not reach the server",
@@ -120,9 +118,7 @@ class PaperlessClient:
                 endpoint,
                 status_code,
             )
-            raise PaperlessAPIError(
-                f"Paperless API request failed with status {status_code}"
-            ) from exc
+            raise PaperlessAPIError(f"Paperless API request failed with status {status_code}") from exc
         except httpx.RequestError as exc:
             logger.error(
                 "Paperless API request failed: %s %s could not reach the server",

@@ -32,10 +32,7 @@ class BulkOperationError(RuntimeError):
         """
         self.completed_ids = completed_ids
         self.failed_id = failed_id
-        super().__init__(
-            f"Bulk {operation} stopped at ID {failed_id}; "
-            f"completed IDs: {completed_ids}; error: {cause}"
-        )
+        super().__init__(f"Bulk {operation} stopped at ID {failed_id}; completed IDs: {completed_ids}; error: {cause}")
 
 
 class DocumentsAPI(EntityAPI):
@@ -53,9 +50,7 @@ class DocumentsAPI(EntityAPI):
         """
         super().__init__(client)
 
-    async def bulk_update(
-        self, document_ids: Sequence[int], updates: dict[str, Any]
-    ) -> dict[str, list[int]]:
+    async def bulk_update(self, document_ids: Sequence[int], updates: dict[str, Any]) -> dict[str, list[int]]:
         """Update selected documents sequentially and report completed IDs.
 
         Args:
@@ -96,13 +91,9 @@ class DocumentsAPI(EntityAPI):
         """
         self._validate_id(document_id)
         endpoint = f"{self.endpoint}{document_id}/download/"
-        content = await self.client.request_bytes(
-            "GET", endpoint, params={"original": "true"}
-        )
+        content = await self.client.request_bytes("GET", endpoint, params={"original": "true"})
         if not content.startswith(b"%PDF-"):
-            raise PaperlessAPIError(
-                f"Paperless document {document_id} download is not a PDF"
-            )
+            raise PaperlessAPIError(f"Paperless document {document_id} download is not a PDF")
         return EmbeddedResource(
             resource=BlobResourceContents(
                 uri=f"paperless://documents/{document_id}/download",
@@ -111,9 +102,7 @@ class DocumentsAPI(EntityAPI):
             )
         )
 
-    async def bulk_delete(
-        self, document_ids: Sequence[int], confirm: bool
-    ) -> dict[str, list[int]]:
+    async def bulk_delete(self, document_ids: Sequence[int], confirm: bool) -> dict[str, list[int]]:
         """Delete selected documents sequentially after explicit confirmation.
 
         Args:
@@ -170,9 +159,7 @@ class DocumentsAPI(EntityAPI):
             tags={"paperless", "documents", "search"},
             icons=icons,
         )
-        async def search_documents(
-            query: str, page: int = 1, page_size: int = 100
-        ) -> dict[str, Any]:
+        async def search_documents(query: str, page: int = 1, page_size: int = 100) -> dict[str, Any]:
             """Search Paperless documents by query.
 
             Args:
@@ -222,9 +209,7 @@ class DocumentsAPI(EntityAPI):
             tags={"paperless", "documents", "update"},
             icons=icons,
         )
-        async def update_document(
-            item_id: int, updates: dict[str, Any]
-        ) -> dict[str, Any]:
+        async def update_document(item_id: int, updates: dict[str, Any]) -> dict[str, Any]:
             """Update Paperless document fields by ID.
 
             Args:
@@ -261,9 +246,7 @@ class DocumentsAPI(EntityAPI):
             tags={"paperless", "documents", "bulk", "update"},
             icons=icons,
         )
-        async def bulk_update_documents(
-            document_ids: list[int], updates: dict[str, Any]
-        ) -> dict[str, list[int]]:
+        async def bulk_update_documents(document_ids: list[int], updates: dict[str, Any]) -> dict[str, list[int]]:
             """Update selected documents, reporting partial success.
 
             Args:
@@ -283,9 +266,7 @@ class DocumentsAPI(EntityAPI):
             tags={"paperless", "documents", "bulk", "delete"},
             icons=icons,
         )
-        async def bulk_delete_documents(
-            document_ids: list[int], confirm: bool = False
-        ) -> dict[str, list[int]]:
+        async def bulk_delete_documents(document_ids: list[int], confirm: bool = False) -> dict[str, list[int]]:
             """Delete selected documents, reporting partial success.
 
             Args:

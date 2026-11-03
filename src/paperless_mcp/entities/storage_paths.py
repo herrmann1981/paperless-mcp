@@ -25,15 +25,11 @@ class StoragePathsAPI(EntityAPI):
         icons = load_entity_icons("storage_paths")
 
         @server.tool(
-            description=(
-                "List Paperless storage paths, with page and page_size controls."
-            ),
+            description=("List Paperless storage paths, with page and page_size controls."),
             tags={"paperless", "storage_paths", "list"},
             icons=icons,
         )
-        async def list_storage_paths(
-            page: int = 1, page_size: int = 100
-        ) -> dict[str, Any]:
+        async def list_storage_paths(page: int = 1, page_size: int = 100) -> dict[str, Any]:
             """List Paperless storage paths with pagination.
 
             Args:
@@ -50,9 +46,7 @@ class StoragePathsAPI(EntityAPI):
             tags={"paperless", "storage_paths", "search"},
             icons=icons,
         )
-        async def search_storage_paths(
-            query: str, page: int = 1, page_size: int = 100
-        ) -> dict[str, Any]:
+        async def search_storage_paths(query: str, page: int = 1, page_size: int = 100) -> dict[str, Any]:
             """Search Paperless storage paths by query.
 
             Args:
@@ -102,9 +96,7 @@ class StoragePathsAPI(EntityAPI):
             tags={"paperless", "storage_paths", "update"},
             icons=icons,
         )
-        async def update_storage_path(
-            item_id: int, updates: dict[str, Any]
-        ) -> dict[str, Any]:
+        async def update_storage_path(item_id: int, updates: dict[str, Any]) -> dict[str, Any]:
             """Update Paperless storage-path fields by ID.
 
             Args:

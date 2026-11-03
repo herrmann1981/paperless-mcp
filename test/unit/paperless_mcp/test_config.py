@@ -6,9 +6,7 @@ from paperless_mcp.config import Settings
 
 
 class TestSettings:
-    def test_loads_settings_from_environment(
-        self, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_loads_settings_from_environment(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Normalize environment settings and preserve the configured log level."""
         monkeypatch.setenv("PAPERLESS_BASE_URL", "https://paperless.example.com/")
         monkeypatch.setenv("PAPERLESS_API_KEY", "secret-token")

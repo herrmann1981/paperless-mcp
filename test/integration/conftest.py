@@ -51,10 +51,7 @@ def _compose(
         env=env,
     )
     if result.returncode:
-        raise RuntimeError(
-            f"Docker Compose command failed: {' '.join(command)}\n"
-            f"{result.stdout}\n{result.stderr}"
-        )
+        raise RuntimeError(f"Docker Compose command failed: {' '.join(command)}\n{result.stdout}\n{result.stderr}")
 
 
 def _wait_for_api(base_url: str, timeout: int = 300) -> str:
@@ -73,14 +70,9 @@ def _wait_for_api(base_url: str, timeout: int = 300) -> str:
                     token = response.json().get("token")
                     if token:
                         return token
-                    raise RuntimeError(
-                        "Paperless token response did not contain a token"
-                    )
+                    raise RuntimeError("Paperless token response did not contain a token")
                 if response.status_code < 500:
-                    raise RuntimeError(
-                        f"Paperless token request failed: "
-                        f"{response.status_code} {response.text[:500]}"
-                    )
+                    raise RuntimeError(f"Paperless token request failed: {response.status_code} {response.text[:500]}")
                 last_error = f"Paperless returned HTTP {response.status_code}"
             except httpx.RequestError as exc:
                 last_error = str(exc)

@@ -33,13 +33,8 @@ class Settings:
             raise ValueError("PAPERLESS_BASE_URL must be set")
         if not api_key:
             raise ValueError("PAPERLESS_API_KEY must be set")
-        if log_level not in VALID_LOG_LEVELS or not isinstance(
-            logging.getLevelName(log_level), int
-        ):
-            raise ValueError(
-                "PAPERLESS_LOG_LEVEL must be one of "
-                f"{', '.join(sorted(VALID_LOG_LEVELS))}"
-            )
+        if log_level not in VALID_LOG_LEVELS or not isinstance(logging.getLevelName(log_level), int):
+            raise ValueError(f"PAPERLESS_LOG_LEVEL must be one of {', '.join(sorted(VALID_LOG_LEVELS))}")
 
         parsed_url = urlparse(base_url)
         if parsed_url.scheme not in {"http", "https"} or not parsed_url.netloc:

@@ -29,9 +29,7 @@ class TestPaperlessClient:
     def test_api_errors_are_reported_without_credentials(self) -> None:
         """Raise an API error when Paperless rejects the authorization."""
 
-        service, client = make_service(
-            lambda request: httpx.Response(401, text="Unauthorized")
-        )
+        service, client = make_service(lambda request: httpx.Response(401, text="Unauthorized"))
 
         try:
             with pytest.raises(PaperlessAPIError, match="status 401"):
@@ -85,9 +83,7 @@ class TestPaperlessClient:
     ) -> None:
         """Log server-side API failures at error level without response contents."""
 
-        service, client = make_service(
-            lambda request: httpx.Response(503, text="internal details")
-        )
+        service, client = make_service(lambda request: httpx.Response(503, text="internal details"))
 
         caplog.set_level(logging.INFO, logger="paperless_mcp.paperless.client")
 

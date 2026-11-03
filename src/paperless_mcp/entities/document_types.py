@@ -25,15 +25,11 @@ class DocumentTypesAPI(EntityAPI):
         icons = load_entity_icons("document_types")
 
         @server.tool(
-            description=(
-                "List Paperless document types, with page and page_size controls."
-            ),
+            description=("List Paperless document types, with page and page_size controls."),
             tags={"paperless", "document_types", "list"},
             icons=icons,
         )
-        async def list_document_types(
-            page: int = 1, page_size: int = 100
-        ) -> dict[str, Any]:
+        async def list_document_types(page: int = 1, page_size: int = 100) -> dict[str, Any]:
             """List Paperless document types with pagination.
 
             Args:
@@ -50,9 +46,7 @@ class DocumentTypesAPI(EntityAPI):
             tags={"paperless", "document_types", "search"},
             icons=icons,
         )
-        async def search_document_types(
-            query: str, page: int = 1, page_size: int = 100
-        ) -> dict[str, Any]:
+        async def search_document_types(query: str, page: int = 1, page_size: int = 100) -> dict[str, Any]:
             """Search Paperless document types by query.
 
             Args:
@@ -102,9 +96,7 @@ class DocumentTypesAPI(EntityAPI):
             tags={"paperless", "document_types", "update"},
             icons=icons,
         )
-        async def update_document_type(
-            item_id: int, updates: dict[str, Any]
-        ) -> dict[str, Any]:
+        async def update_document_type(item_id: int, updates: dict[str, Any]) -> dict[str, Any]:
             """Update Paperless document-type fields by ID.
 
             Args:
