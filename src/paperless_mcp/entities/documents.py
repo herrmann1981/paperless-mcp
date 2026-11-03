@@ -1,9 +1,11 @@
 """Document-specific Paperless API operations."""
 
+from base64 import b64encode
 from collections.abc import Sequence
 from typing import Any
 
 from fastmcp import FastMCP
+from mcp.types import BlobResourceContents, EmbeddedResource
 
 from paperless_mcp.entities.base import EntityAPI
 from paperless_mcp.icons import load_entity_icons
@@ -56,6 +58,23 @@ class DocumentsAPI(EntityAPI):
             completed.append(document_id)
         return {"updated_ids": completed}
 
+    async def download(self, document_id: int) -> EmbeddedResource:
+        """Download a document PDF as MCP binary resource content."""
+        self._validate_id(document_id)
+        endpoint = f"{self.endpoint}{document_id}/download/"
+        content = await self.client.request_bytes("GET", endpoint)
+        if not content.startswith(b"%PDF-"):
+            raise PaperlessAPIError(
+                f"Paperless document {document_id} download is not a PDF"
+            )
+        return EmbeddedResource(
+            resource=BlobResourceContents(
+                uri=f"paperless://documents/{document_id}/download",
+                mimeType="application/pdf",
+                blob=b64encode(content).decode("ascii"),
+            )
+        )
+
     async def bulk_delete(
         self, document_ids: Sequence[int], confirm: bool
     ) -> dict[str, list[int]]:
@@ -105,6 +124,15 @@ class DocumentsAPI(EntityAPI):
         async def read_document(item_id: int) -> dict[str, Any]:
             """Read a Paperless document by ID."""
             return await entity.read(item_id)
+
+        @server.tool(
+            description="Download a Paperless document as a PDF file.",
+            tags={"paperless", "documents", "download"},
+            icons=icons,
+        )
+        async def download_document(item_id: int) -> EmbeddedResource:
+            """Download a document PDF as an MCP binary resource."""
+            return await entity.download(item_id)
 
         @server.tool(
             description="Patch fields on a Paperless document by ID.",

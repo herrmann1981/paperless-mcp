@@ -5,12 +5,14 @@ import json
 
 import httpx
 import pytest
+from fastmcp import FastMCP
+from mcp.types import EmbeddedResource
 
 from paperless_mcp.config import Settings
 from paperless_mcp.entities.custom_fields import CustomFieldsAPI
 from paperless_mcp.entities.documents import BulkOperationError, DocumentsAPI
 from paperless_mcp.entities.tags import TagsAPI
-from paperless_mcp.paperless import PaperlessClient
+from paperless_mcp.paperless import PaperlessAPIError, PaperlessClient
 
 
 def run(coro):
@@ -35,6 +37,58 @@ def make_service(handler, api_type=DocumentsAPI):
 
 
 class TestEntityAPI:
+    def test_download_returns_pdf_as_embedded_mcp_resource(self) -> None:
+        """Expose downloaded PDF bytes as a typed MCP binary resource."""
+        pdf_bytes = b"%PDF-1.7\nexample"
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            """Verify authenticated document-download request details."""
+            assert request.method == "GET"
+            assert request.url.path == "/api/documents/7/download/"
+            assert request.headers["Authorization"] == "Token test-token"
+            return httpx.Response(200, content=pdf_bytes)
+
+        service, client, _ = make_service(handler)
+        server = FastMCP("test")
+        service.register_tools(server)
+        try:
+            result = run(server.call_tool("download_document", {"item_id": 7}))
+        finally:
+            run(client.close())
+
+        assert len(result.content) == 1
+        resource = result.content[0]
+        assert isinstance(resource, EmbeddedResource)
+        assert resource.resource.uri == "paperless://documents/7/download"
+        assert resource.resource.mime_type == "application/pdf"
+        assert resource.resource.blob == "JVBERi0xLjcKZXhhbXBsZQ=="
+
+    def test_download_rejects_non_pdf_response(self) -> None:
+        """Reject a successful HTTP response that does not contain a PDF."""
+        service, client, requests = make_service(
+            lambda request: httpx.Response(200, content=b"not a PDF")
+        )
+        try:
+            with pytest.raises(PaperlessAPIError, match="is not a PDF"):
+                run(service.download(7))
+        finally:
+            run(client.close())
+
+        assert len(requests) == 1
+
+    def test_download_rejects_invalid_id_without_request(self) -> None:
+        """Reject non-positive document IDs before attempting a download."""
+        service, client, requests = make_service(
+            lambda request: httpx.Response(200, content=b"%PDF-1.7")
+        )
+        try:
+            with pytest.raises(ValueError, match="positive"):
+                run(service.download(0))
+        finally:
+            run(client.close())
+
+        assert requests == []
+
     def test_search_sends_auth_query_and_pagination(self) -> None:
         """Send search and pagination parameters with the API token."""
 

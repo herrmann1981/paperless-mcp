@@ -86,6 +86,7 @@ Keep `.env` local and do not put API keys directly in the command arguments.
 | `list_documents` | List documents. |
 | `search_documents` | Search documents. |
 | `read_document` | Read a document by ID. |
+| `download_document` | Download a document as an MCP PDF resource. |
 | `update_document` | Update a document by ID. |
 | `delete_document` | Delete a document by ID; requires `confirm=true`. |
 | `bulk_update_documents` | Update selected document IDs. |

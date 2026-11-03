@@ -21,6 +21,7 @@ class TestServer:
             "list_documents",
             "search_documents",
             "read_document",
+            "download_document",
             "update_document",
             "delete_document",
             "list_tags",
