@@ -33,7 +33,7 @@ jobs:
       - name: Verify release tag and install smoke-test dependencies
         run: |
           package_version="$(uv version --short)"
-          test "$GITHUB_REF_NAME" = "v$package_version"
+          test "$GITHUB_REF_NAME" = "$package_version"
           uv sync --locked --group dev
 
       - name: Set up Docker Buildx
