@@ -3,7 +3,7 @@ name: Publish
 on:
   push:
     tags:
-      - "*"
+      - "v*"
 
 permissions:
   contents: write
@@ -17,6 +17,20 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Verify release tag and install smoke-test dependencies
+        run: |
+          package_version="$(uv version --short)"
+          test "$GITHUB_REF_NAME" = "v$package_version"
+          uv sync --locked --group dev
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -37,13 +51,37 @@ jobs:
             type=ref,event=tag
             type=raw,value=latest
 
-      - name: Build and publish Docker image
+      - name: Build Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
-          push: true
+          load: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Smoke-test MCP stdio initialization
+        env:
+          IMAGE_REF: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+        run: uv run python scripts/smoke_docker_mcp.py "$IMAGE_REF"
+
+      - name: Scan image for vulnerabilities
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+          format: table
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+          exit-code: "1"
+
+      - name: Publish verified Docker image tags
+        env:
+          IMAGE_TAGS: ${{ steps.meta.outputs.tags }}
+        run: |
+          while IFS= read -r image; do
+            if [ -n "$image" ]; then
+              docker push "$image"
+            fi
+          done <<< "$IMAGE_TAGS"
 
       - name: Create source archive
         env:
