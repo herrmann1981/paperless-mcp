@@ -1,9 +1,13 @@
 name: Publish
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 on:
   push:
     tags:
-      - "v*"
+      - "*"
 
 permissions:
   contents: write

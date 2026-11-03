@@ -1,7 +1,15 @@
 name: Test
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
 on:
   push:
+    branches:
+      - "**"
+    tags-ignore:
+      - "*"
   pull_request:
 
 permissions:
