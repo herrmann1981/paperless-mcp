@@ -4,10 +4,10 @@ build-backend = "hatchling.build"
 
 [project]
 name = "paperless-mcp"
-version = "0.1.0"
+version = "1.0.4"
 description = "A FastMCP server for the Paperless-ngx API"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.14"
 dependencies = [
     "fastmcp>=2.0",
     "httpx>=0.27",
@@ -35,7 +35,7 @@ markers = [
 
 [tool.ruff]
 line-length = 120
-target-version = "py310"
+target-version = "py314"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
