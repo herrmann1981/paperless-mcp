@@ -37,6 +37,21 @@ def make_service(handler, api_type=DocumentsAPI):
 
 
 class TestEntityAPI:
+    def test_list_defaults_to_maximum_page_size(self) -> None:
+        """Use page size 100 when a caller does not specify it."""
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            """Verify the default pagination values sent to Paperless."""
+            assert request.url.params["page"] == "1"
+            assert request.url.params["page_size"] == "100"
+            return httpx.Response(200, json={"results": []})
+
+        service, client, _ = make_service(handler)
+        try:
+            run(service.list())
+        finally:
+            run(client.close())
+
     def test_download_returns_pdf_as_embedded_mcp_resource(self) -> None:
         """Expose downloaded PDF bytes as a typed MCP binary resource."""
         pdf_bytes = b"%PDF-1.7\nexample"

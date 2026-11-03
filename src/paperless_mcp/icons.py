@@ -12,7 +12,14 @@ EntityName = Literal[
 
 
 def _load_icons(asset_prefix: str) -> list[Icon]:
-    """Load light and dark SVG assets for the requested icon prefix."""
+    """Load the light and dark SVG assets for the requested icon prefix.
+
+    Args:
+        asset_prefix: The icon asset name prefix without the theme suffix.
+
+    Returns:
+        list[Icon]: A pair of theme-specific icons ready to register with FastMCP.
+    """
     assets = files("paperless_mcp").joinpath("assets")
     icons = []
     for theme in ("light", "dark"):
@@ -25,10 +32,21 @@ def _load_icons(asset_prefix: str) -> list[Icon]:
 
 
 def load_server_icons() -> list[Icon]:
-    """Return the general Paperless server icons for both themes."""
+    """Return the general Paperless server icons for both themes.
+
+    Returns:
+        list[Icon]: Light and dark variants of the server icon set.
+    """
     return _load_icons("paperless-mcp")
 
 
 def load_entity_icons(entity: EntityName) -> list[Icon]:
-    """Return entity-specific light- and dark-theme SVG icons."""
+    """Return entity-specific light- and dark-theme SVG icons.
+
+    Args:
+        entity: The Paperless entity name used to select the icon asset bundle.
+
+    Returns:
+        list[Icon]: Light and dark variants for the requested entity icon set.
+    """
     return _load_icons(f"paperless-mcp-{entity}")

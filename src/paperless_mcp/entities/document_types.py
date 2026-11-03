@@ -9,14 +9,18 @@ from paperless_mcp.icons import load_entity_icons
 
 
 class DocumentTypesAPI(EntityAPI):
-    """Document type API operations."""
+    """Document type API operations for Paperless metadata categories."""
 
     endpoint = "document_types/"
     plural_name = "document_types"
     singular_name = "document_type"
 
     def register_tools(self, server: FastMCP) -> None:
-        """Register document-type tools with descriptions, tags, and icons."""
+        """Register document-type tools with descriptions, tags, and icons.
+
+        Args:
+            server: FastMCP server instance to register with.
+        """
         entity = self
         icons = load_entity_icons("document_types")
 
@@ -28,9 +32,17 @@ class DocumentTypesAPI(EntityAPI):
             icons=icons,
         )
         async def list_document_types(
-            page: int = 1, page_size: int = 25
+            page: int = 1, page_size: int = 100
         ) -> dict[str, Any]:
-            """List Paperless document types with pagination."""
+            """List Paperless document types with pagination.
+
+            Args:
+                page: 1-based page number to retrieve.
+                page_size: Number of items to include per page.
+
+            Returns:
+                dict[str, Any]: Paginated document-type list from the API.
+            """
             return await entity.list(page=page, page_size=page_size)
 
         @server.tool(
@@ -39,9 +51,18 @@ class DocumentTypesAPI(EntityAPI):
             icons=icons,
         )
         async def search_document_types(
-            query: str, page: int = 1, page_size: int = 25
+            query: str, page: int = 1, page_size: int = 100
         ) -> dict[str, Any]:
-            """Search Paperless document types by query."""
+            """Search Paperless document types by query.
+
+            Args:
+                query: Search string used to filter document types.
+                page: 1-based page number to retrieve.
+                page_size: Number of items to include per page.
+
+            Returns:
+                dict[str, Any]: Matching document types returned by the API.
+            """
             return await entity.list(search=query, page=page, page_size=page_size)
 
         @server.tool(
@@ -50,7 +71,14 @@ class DocumentTypesAPI(EntityAPI):
             icons=icons,
         )
         async def read_document_type(item_id: int) -> dict[str, Any]:
-            """Read a Paperless document type by ID."""
+            """Read a Paperless document type by ID.
+
+            Args:
+                item_id: Numeric identifier of the document type to fetch.
+
+            Returns:
+                dict[str, Any]: Document type payload returned by the API.
+            """
             return await entity.read(item_id)
 
         @server.tool(
@@ -59,7 +87,14 @@ class DocumentTypesAPI(EntityAPI):
             icons=icons,
         )
         async def create_document_type(data: dict[str, Any]) -> dict[str, Any]:
-            """Create a Paperless document type."""
+            """Create a Paperless document type.
+
+            Args:
+                data: Field values to use when creating the document type.
+
+            Returns:
+                dict[str, Any]: Newly created document type returned by the API.
+            """
             return await entity.create(data)
 
         @server.tool(
@@ -70,7 +105,15 @@ class DocumentTypesAPI(EntityAPI):
         async def update_document_type(
             item_id: int, updates: dict[str, Any]
         ) -> dict[str, Any]:
-            """Update Paperless document-type fields by ID."""
+            """Update Paperless document-type fields by ID.
+
+            Args:
+                item_id: Numeric identifier of the document type to update.
+                updates: Field names and values to patch.
+
+            Returns:
+                dict[str, Any]: Updated document type payload returned by the API.
+            """
             return await entity.update(item_id, updates)
 
         @server.tool(
@@ -79,5 +122,13 @@ class DocumentTypesAPI(EntityAPI):
             icons=icons,
         )
         async def delete_document_type(item_id: int, confirm: bool = False) -> Any:
-            """Delete a document type only when confirm is true."""
+            """Delete a document type only when confirm is true.
+
+            Args:
+                item_id: Numeric identifier of the document type to delete.
+                confirm: Whether deletion is explicitly confirmed.
+
+            Returns:
+                Any: API response or None for an empty response.
+            """
             return await entity.delete(item_id, confirm)

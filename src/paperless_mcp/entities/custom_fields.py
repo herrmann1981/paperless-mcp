@@ -16,7 +16,11 @@ class CustomFieldsAPI(EntityAPI):
     singular_name = "custom_field"
 
     def register_tools(self, server: FastMCP) -> None:
-        """Register custom-field tools with descriptions, tags, and icons."""
+        """Register custom-field tools with descriptions, tags, and icons.
+
+        Args:
+            server: FastMCP server instance to register with.
+        """
         entity = self
         icons = load_entity_icons("custom_fields")
 
@@ -29,9 +33,17 @@ class CustomFieldsAPI(EntityAPI):
             icons=icons,
         )
         async def list_custom_fields(
-            page: int = 1, page_size: int = 25
+            page: int = 1, page_size: int = 100
         ) -> dict[str, Any]:
-            """List Paperless custom-field definitions with pagination."""
+            """List Paperless custom-field definitions with pagination.
+
+            Args:
+                page: 1-based page number to retrieve.
+                page_size: Number of items to include per page.
+
+            Returns:
+                dict[str, Any]: Paginated custom-field definitions from the API.
+            """
             return await entity.list(page=page, page_size=page_size)
 
         @server.tool(
@@ -42,9 +54,18 @@ class CustomFieldsAPI(EntityAPI):
             icons=icons,
         )
         async def search_custom_fields(
-            query: str, page: int = 1, page_size: int = 25
+            query: str, page: int = 1, page_size: int = 100
         ) -> dict[str, Any]:
-            """Search Paperless custom-field definitions by query."""
+            """Search Paperless custom-field definitions by query.
+
+            Args:
+                query: Search string used to filter custom fields.
+                page: 1-based page number to retrieve.
+                page_size: Number of items to include per page.
+
+            Returns:
+                dict[str, Any]: Matching custom-field definitions returned by the API.
+            """
             return await entity.list(search=query, page=page, page_size=page_size)
 
         @server.tool(
@@ -53,7 +74,14 @@ class CustomFieldsAPI(EntityAPI):
             icons=icons,
         )
         async def read_custom_field(item_id: int) -> dict[str, Any]:
-            """Read a Paperless custom-field definition by ID."""
+            """Read a Paperless custom-field definition by ID.
+
+            Args:
+                item_id: Numeric identifier of the custom field definition to fetch.
+
+            Returns:
+                dict[str, Any]: Custom-field definition payload returned by the API.
+            """
             return await entity.read(item_id)
 
         @server.tool(
@@ -64,7 +92,14 @@ class CustomFieldsAPI(EntityAPI):
             icons=icons,
         )
         async def create_custom_field(data: dict[str, Any]) -> dict[str, Any]:
-            """Create a Paperless custom-field definition."""
+            """Create a Paperless custom-field definition.
+
+            Args:
+                data: Field values to use when creating the custom-field definition.
+
+            Returns:
+                dict[str, Any]: Newly created custom-field definition returned by the API.
+            """
             return await entity.create(data)
 
         @server.tool(
@@ -75,7 +110,15 @@ class CustomFieldsAPI(EntityAPI):
         async def update_custom_field(
             item_id: int, updates: dict[str, Any]
         ) -> dict[str, Any]:
-            """Update Paperless custom-field definition fields by ID."""
+            """Update Paperless custom-field definition fields by ID.
+
+            Args:
+                item_id: Numeric identifier of the custom-field definition to update.
+                updates: Field names and values to patch.
+
+            Returns:
+                dict[str, Any]: Updated custom-field definition payload returned by the API.
+            """
             return await entity.update(item_id, updates)
 
         @server.tool(
@@ -86,5 +129,13 @@ class CustomFieldsAPI(EntityAPI):
             icons=icons,
         )
         async def delete_custom_field(item_id: int, confirm: bool = False) -> Any:
-            """Delete a custom-field definition only when confirm is true."""
+            """Delete a custom-field definition only when confirm is true.
+
+            Args:
+                item_id: Numeric identifier of the custom-field definition to delete.
+                confirm: Whether deletion is explicitly confirmed.
+
+            Returns:
+                Any: API response or None for an empty response.
+            """
             return await entity.delete(item_id, confirm)

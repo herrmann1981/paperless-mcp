@@ -10,7 +10,7 @@ VALID_LOG_LEVELS = {"DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"}
 
 @dataclass(frozen=True)
 class Settings:
-    """Paperless connection settings."""
+    """Runtime configuration for the Paperless MCP server."""
 
     base_url: str
     api_key: str
@@ -18,7 +18,14 @@ class Settings:
 
     @classmethod
     def from_env(cls) -> "Settings":
-        """Load and validate settings from the process environment."""
+        """Load and validate settings from the process environment.
+
+        Returns:
+            Settings: A validated configuration object for the server.
+
+        Raises:
+            ValueError: If a required environment variable is missing or invalid.
+        """
         base_url = os.environ.get("PAPERLESS_BASE_URL", "").strip().rstrip("/")
         api_key = os.environ.get("PAPERLESS_API_KEY", "").strip()
         log_level = os.environ.get("PAPERLESS_LOG_LEVEL", "INFO").strip().upper()

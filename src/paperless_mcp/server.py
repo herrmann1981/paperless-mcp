@@ -15,7 +15,15 @@ logger = logging.getLogger(__name__)
 
 
 def create_server(settings: Settings | None = None) -> FastMCP:
-    """Build the MCP server and register entity-specific Paperless tools."""
+    """Create and configure the Paperless MCP server.
+
+    Args:
+        settings: Optional environment configuration to use instead of loading from
+            the process environment.
+
+    Returns:
+        FastMCP: A configured server with all Paperless entity tools registered.
+    """
     settings = settings or Settings.from_env()
     configure_logging(settings.log_level)
     logger.info("Starting Paperless MCP server")
@@ -35,7 +43,11 @@ def create_server(settings: Settings | None = None) -> FastMCP:
 
 
 def main() -> None:
-    """Run the server over stdio for MCP clients."""
+    """Run the server over stdio for MCP clients.
+
+    Raises:
+        ValueError: If server settings cannot be loaded from the environment.
+    """
     create_server().run()
 
 

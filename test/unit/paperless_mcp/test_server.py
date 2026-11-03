@@ -67,6 +67,21 @@ class TestServer:
             tool.tags for tool in tools if tool.name == "bulk_delete_documents"
         )
 
+        for tool_name in (
+            "list_documents",
+            "search_documents",
+            "list_tags",
+            "search_tags",
+            "list_document_types",
+            "search_document_types",
+            "list_storage_paths",
+            "search_storage_paths",
+            "list_custom_fields",
+            "search_custom_fields",
+        ):
+            tool = next(tool for tool in tools if tool.name == tool_name)
+            assert tool.parameters["properties"]["page_size"]["default"] == 100
+
     def test_each_entity_uses_its_own_icon_set(self) -> None:
         """Use one distinct themed icon set per entity across its tools."""
         server = create_server(Settings("http://paperless.test", "test-token"))
