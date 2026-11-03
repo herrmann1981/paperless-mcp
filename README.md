@@ -99,6 +99,11 @@ The server requires a running Paperless-ngx server and a valid API token.
 Requests use the configured token for authentication, and Paperless permissions
 continue to control which records the token can access or modify.
 
+Example command:
+```
+docker run -i -rm --dns=IP_OF_DNS_SERVER_TO_RESOLVE_PAPERLESS -e PAPERLESS_BASE_URL=http://paperless.host:port -e PAPERLESS_API_KEY=API_KEY_FROM_PAPERLESS paperless-mcp:1.0.0
+```
+
 ## Available tools
 
 ### Documents
