@@ -113,7 +113,7 @@ docker run -i -rm --dns=IP_OF_DNS_SERVER_TO_RESOLVE_PAPERLESS -e PAPERLESS_BASE_
 | `list_documents` | List document records. |
 | `search_documents` | Search document records. |
 | `read_document` | Read a document's Paperless API record by ID. |
-| `download_document` | Download a document's PDF as an MCP binary resource. |
+| `download_document` | Download the original document's PDF as an MCP binary resource. |
 | `update_document` | Update document metadata by ID. |
 | `delete_document` | Delete a document by ID; requires `confirm=true`. |
 | `bulk_update_documents` | Update an explicit list of document IDs. |

@@ -96,7 +96,9 @@ class DocumentsAPI(EntityAPI):
         """
         self._validate_id(document_id)
         endpoint = f"{self.endpoint}{document_id}/download/"
-        content = await self.client.request_bytes("GET", endpoint)
+        content = await self.client.request_bytes(
+            "GET", endpoint, params={"original": "true"}
+        )
         if not content.startswith(b"%PDF-"):
             raise PaperlessAPIError(
                 f"Paperless document {document_id} download is not a PDF"
@@ -200,7 +202,7 @@ class DocumentsAPI(EntityAPI):
             return await entity.read(item_id)
 
         @server.tool(
-            description="Download a Paperless document as a PDF file.",
+            description="Download the original Paperless document as a PDF file.",
             tags={"paperless", "documents", "download"},
             icons=icons,
         )

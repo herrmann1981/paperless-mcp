@@ -88,12 +88,18 @@ class PaperlessClient:
             return None
         return response.json()
 
-    async def request_bytes(self, method: str, endpoint: str) -> bytes:
+    async def request_bytes(
+        self,
+        method: str,
+        endpoint: str,
+        params: dict[str, str] | None = None,
+    ) -> bytes:
         """Make an API request and return its raw response body.
 
         Args:
             method: HTTP method to use, typically GET for file downloads.
             endpoint: Relative API endpoint path to fetch.
+            params: Optional query parameters to include in the request.
 
         Returns:
             bytes: Response payload as raw binary data.
@@ -103,7 +109,7 @@ class PaperlessClient:
                 transport-level failure.
         """
         try:
-            response = await self._http.request(method, endpoint)
+            response = await self._http.request(method, endpoint, params=params)
             response.raise_for_status()
         except httpx.HTTPStatusError as exc:
             status_code = exc.response.status_code

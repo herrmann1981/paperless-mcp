@@ -60,6 +60,7 @@ class TestEntityAPI:
             """Verify authenticated document-download request details."""
             assert request.method == "GET"
             assert request.url.path == "/api/documents/7/download/"
+            assert request.url.params["original"] == "true"
             assert request.headers["Authorization"] == "Token test-token"
             return httpx.Response(200, content=pdf_bytes)
 
