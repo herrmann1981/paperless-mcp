@@ -34,7 +34,7 @@ $env:PAPERLESS_API_KEY = "your-paperless-api-token"
 uv run paperless-mcp
 ```
 
-The project requires Python 3.10 or later. `uv sync --locked` installs the
+The project requires Python 3.14 or later. `uv sync --locked` installs the
 project dependencies from `uv.lock`; `uv run paperless-mcp` starts the server.
 Install [uv](https://docs.astral.sh/uv/) before following these steps.
 
@@ -42,7 +42,7 @@ Install [uv](https://docs.astral.sh/uv/) before following these steps.
 
 ```powershell
 .\scripts\build-docker.ps1
-docker run --rm --env-file .env paperless-mcp
+docker run --rm -i --env-file .env paperless-mcp:local
 ```
 
 The build script tags the image as `paperless-mcp:local` by default. To choose
@@ -55,11 +55,11 @@ a different Docker image name and tag, pass it as the first argument:
 You can also build directly with Docker using
 `docker build -t paperless-mcp:local .`.
 
-The image uses Python 3.12 and installs the locked runtime dependencies. The
-server uses stdio transport, as expected by local MCP clients. Logs are written
-to stderr so they do not interfere with the MCP protocol. API logs include
-request methods, endpoint paths, and status codes, but exclude API keys,
-request payloads, and response bodies.
+The image uses Python 3.14, installs the locked runtime dependencies, and runs
+as a non-root user. The server uses stdio transport, as expected by local MCP
+clients. Logs are written to stderr so they do not interfere with the MCP
+protocol. API logs include request methods, endpoint paths, and status codes,
+but exclude API keys, request payloads, and response bodies.
 
 ## Configure in GitHub Copilot CLI
 
@@ -99,10 +99,15 @@ The server requires a running Paperless-ngx server and a valid API token.
 Requests use the configured token for authentication, and Paperless permissions
 continue to control which records the token can access or modify.
 
-Example command:
+Example command (replace the DNS server address if needed):
+
+```powershell
+docker run --rm -i --env-file .env --dns 192.168.1.1 ghcr.io/herrmann1981/paperless-mcp:latest
 ```
-docker run -i -rm --dns=IP_OF_DNS_SERVER_TO_RESOLVE_PAPERLESS -e PAPERLESS_BASE_URL=http://paperless.host:port -e PAPERLESS_API_KEY=API_KEY_FROM_PAPERLESS paperless-mcp:1.0.0
-```
+
+Use the DNS server option only when the Paperless hostname requires your LAN
+resolver. Published images are available as
+`ghcr.io/herrmann1981/paperless-mcp:<version>` and `:latest`.
 
 ## Available tools
 
@@ -179,7 +184,7 @@ earlier changes may already have succeeded.
 
 ### Setup and checks
 
-Install Python 3.10 or later and [uv](https://docs.astral.sh/uv/), then sync
+Install Python 3.14 or later and [uv](https://docs.astral.sh/uv/), then sync
 the development dependencies:
 
 ```powershell
@@ -194,11 +199,10 @@ uv run ruff check .
 uv run ruff format --check .
 ```
 
-Install `pre-commit` separately to run the same hooks locally:
+Run the same hooks locally with the development dependencies installed:
 
 ```powershell
-uv tool install pre-commit
-pre-commit run --all-files
+uv run pre-commit run --all-files
 ```
 
 ### Tests
@@ -248,7 +252,7 @@ test/
 
 `.github/agents/` contains specialized profiles for Python implementation,
 documentation, pytest testing, code review, and project planning. Source style
-uses Ruff with an 88-character line length, Python 3.10 target, and the `E`,
+uses Ruff with a 120-character line length, Python 3.14 target, and the `E`,
 `F`, `I`, `UP`, and `B` lint rules.
 
 The entity modules register tools with the server; common entity CRUD requests
@@ -259,16 +263,19 @@ and API error handling.
 ## Continuous integration and releases
 
 `.github/workflows/test.yml` runs for pushes and pull requests. It installs
-Python 3.12 and the locked development dependencies, runs pre-commit, and runs
+Python 3.14 and the locked development dependencies, runs pre-commit, and runs
 the default pytest suite (unit tests; integration tests are excluded).
 
 Pushing a Git tag beginning with `v` starts
-`.github/workflows/tag.yml`. It builds the Docker image and publishes tag and
-`latest` tags to GitHub Container Registry (`ghcr.io/<owner>/<repository>`),
-then creates a GitHub Release with generated notes and a ZIP source archive of
-the tagged commit attached.
+`.github/workflows/tag.yml`. The tag must match the package version (for
+example, `v1.0.4`). The workflow builds the Docker image, verifies its MCP stdio
+initialization handshake, scans it for HIGH and CRITICAL vulnerabilities, and
+only then publishes the version and `latest` tags to GitHub Container Registry
+(`ghcr.io/<owner>/<repository>`). It then creates a GitHub Release with
+generated notes and a ZIP source archive of the tagged commit attached.
 
-The MCP server version is defined by `__version__` in
-`src/paperless_mcp/__init__.py`; update it for releases. The server and entity
-icons are packaged in `src/paperless_mcp/assets/` as light/dark SVGs and
-embedded in MCP metadata as data URIs.
+The MCP server version comes from the `project.version` field in `pyproject.toml`
+and is read from installed package metadata. Update that field and create a
+matching `v` tag for releases. The server and entity icons are packaged in
+`src/paperless_mcp/assets/` as light/dark SVGs and embedded in MCP metadata as
+data URIs.
