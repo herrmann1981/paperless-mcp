@@ -1,6 +1,9 @@
 """FastMCP server entry point."""
 
 import logging
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+from typing import Any
 
 from fastmcp import FastMCP
 
@@ -28,6 +31,14 @@ def create_server(settings: Settings | None = None) -> FastMCP:
     configure_logging(settings.log_level)
     logger.info("Starting Paperless MCP server")
     client = PaperlessClient(settings)
+
+    @asynccontextmanager
+    async def client_lifespan(_: FastMCP) -> AsyncIterator[dict[str, Any]]:
+        try:
+            yield {}
+        finally:
+            await client.close()
+
     server = FastMCP(
         name="paperless",
         instructions=(
@@ -35,6 +46,7 @@ def create_server(settings: Settings | None = None) -> FastMCP:
         ),
         version=__version__,
         icons=load_server_icons(),
+        lifespan=client_lifespan,
     )
     for api_class in ENTITY_APIS:
         api_class(client).register_tools(server)

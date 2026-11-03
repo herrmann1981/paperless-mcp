@@ -1,3 +1,5 @@
 """MCP tools for the Paperless-ngx API."""
 
-__version__ = "1.0.4"
+from importlib.metadata import version
+
+__version__ = version("paperless-mcp")
