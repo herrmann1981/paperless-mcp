@@ -164,7 +164,7 @@ docker run -i -rm --dns=IP_OF_DNS_SERVER_TO_RESOLVE_PAPERLESS -e PAPERLESS_BASE_
 | `delete_custom_field` | Delete a custom-field definition by ID; requires `confirm=true`. |
 
 All list and search tools accept `page` (default `1`) and `page_size` (default
-`100`, maximum `100`). Search tools also require a `query`. Create tools accept
+`100`, maximum `1000`). Search tools also require a `query`. Create tools accept
 a `data` object and update tools accept an `updates` object; both use fields
 supported by the corresponding Paperless API endpoint. `download_document`
 returns PDF bytes as an MCP resource with the `application/pdf` media type.

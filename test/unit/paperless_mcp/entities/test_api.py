@@ -124,7 +124,7 @@ class TestEntityAPI:
 
         assert result == {"results": [{"id": 8}]}
 
-    @pytest.mark.parametrize("page_size", [1, 100])
+    @pytest.mark.parametrize("page_size", [1, 1000])
     def test_list_accepts_page_size_boundaries(self, page_size: int) -> None:
         """Allow the configured minimum and maximum page sizes."""
 
@@ -255,7 +255,7 @@ class TestEntityAPI:
             "/api/documents/6/",
         ]
 
-    @pytest.mark.parametrize("page_size", [0, 101])
+    @pytest.mark.parametrize("page_size", [0, 1001])
     def test_list_rejects_out_of_range_page_size(self, page_size: int) -> None:
         """Reject invalid page sizes before attempting a Paperless request."""
         service, client, requests = make_service(

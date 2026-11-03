@@ -31,7 +31,7 @@ class EntityAPI:
         Args:
             search: Optional full-text search term to filter results.
             page: 1-based page number to retrieve.
-            page_size: Number of items to return per page, between 1 and 100.
+            page_size: Number of items to return per page, between 1 and 1000.
 
         Returns:
             dict[str, Any]: The decoded API response containing paginated records.
@@ -41,8 +41,8 @@ class EntityAPI:
         """
         if page < 1:
             raise ValueError("page must be at least 1")
-        if not 1 <= page_size <= 100:
-            raise ValueError("page_size must be between 1 and 100")
+        if not 1 <= page_size <= 1000:
+            raise ValueError("page_size must be between 1 and 1000")
         params: dict[str, Any] = {"page": page, "page_size": page_size}
         if search:
             params["search"] = search
