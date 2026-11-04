@@ -118,22 +118,30 @@ jobs:
           gh api "repos/$GITHUB_REPOSITORY/releases/generate-notes" "${api_args[@]}" \
             --jq .body > "$RUNNER_TEMP/release-notes.md"
 
-          gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/issues" \
+          if closed_issue_pages="$(gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/issues" \
             -f state=closed \
             -f "since=$previous_tag_date" \
-            -F per_page=100 \
-            | jq -r --argjson since_epoch "$previous_tag_epoch" '
-                add
-                | map(select(
-                    .pull_request == null
-                    and (.closed_at | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601) >= $since_epoch
-                  ))
-                | sort_by(.closed_at)
-                | if length == 0 then ""
-                  else "\n\n## Closed issues\n\n" +
-                    (map("- [#\(.number)](\(.html_url)) \(.title)") | join("\n"))
-                  end
-              ' >> "$RUNNER_TEMP/release-notes.md"
+            -F per_page=100)"; then
+            if jq -e 'type == "array" and all(.[]; type == "array" and all(.[]; type == "object"))' \
+              <<< "$closed_issue_pages" > /dev/null; then
+              jq -r --arg since "$previous_tag_date" '
+                  (add // [])
+                  | map(select(
+                      .pull_request == null
+                      and .closed_at >= $since
+                    ))
+                  | sort_by(.closed_at)
+                  | if length == 0 then ""
+                    else "\n\n## Closed issues\n\n" +
+                      (map("- [#\(.number)](\(.html_url)) \(.title)") | join("\n"))
+                    end
+                ' <<< "$closed_issue_pages" >> "$RUNNER_TEMP/release-notes.md"
+            else
+              echo "::warning::GitHub returned an unexpected response while listing closed issues; creating release with generated pull request notes only."
+            fi
+          else
+            echo "::warning::Could not list closed issues with GITHUB_TOKEN; creating release with generated pull request notes only."
+          fi
 
       - name: Create GitHub release with generated release notes
         env:
