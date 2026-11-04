@@ -1,5 +1,9 @@
 FROM ghcr.io/astral-sh/uv:python3.14-bookworm-slim
 
+RUN apt-get update \
+    && apt-get upgrade -y --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
 COPY pyproject.toml uv.lock README.md ./
