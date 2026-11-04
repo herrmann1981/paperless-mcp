@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: write
+  issues: read
   packages: write
 
 jobs:
@@ -96,7 +97,44 @@ jobs:
             --output="$archive_name" "$GITHUB_REF"
           echo "ARCHIVE_NAME=$archive_name" >> "$GITHUB_ENV"
 
-      - name: Create GitHub release and attach source archive
+      - name: Generate release notes with closed issues
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create "$GITHUB_REF_NAME" "$ARCHIVE_NAME" --generate-notes --verify-tag
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          previous_tag="$(git describe --tags --abbrev=0 "${GITHUB_SHA}^" 2>/dev/null || true)"
+          if [ -n "$previous_tag" ]; then
+            previous_tag_epoch="$(git log -1 --format=%ct "$previous_tag")"
+          else
+            previous_tag_epoch=0
+          fi
+          previous_tag_date="$(date -u -d "@$previous_tag_epoch" '+%Y-%m-%dT%H:%M:%SZ')"
+
+          api_args=(-f "tag_name=$TAG_NAME" -F "target_commitish=$GITHUB_SHA")
+          if [ -n "$previous_tag" ]; then
+            api_args+=(-f "previous_tag=$previous_tag")
+          fi
+          gh api "repos/$GITHUB_REPOSITORY/releases/generate-notes" "${api_args[@]}" \
+            --jq .body > "$RUNNER_TEMP/release-notes.md"
+
+          gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/issues" \
+            -f state=closed \
+            -f "since=$previous_tag_date" \
+            -F per_page=100 \
+            | jq -r --argjson since_epoch "$previous_tag_epoch" '
+                add
+                | map(select(
+                    .pull_request == null
+                    and (.closed_at | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601) >= $since_epoch
+                  ))
+                | sort_by(.closed_at)
+                | if length == 0 then ""
+                  else "\n\n## Closed issues\n\n" +
+                    (map("- [#\(.number)](\(.html_url)) \(.title)") | join("\n"))
+                  end
+              ' >> "$RUNNER_TEMP/release-notes.md"
+
+      - name: Create GitHub release with generated release notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create "$GITHUB_REF_NAME" "$ARCHIVE_NAME" --title "$GITHUB_REF_NAME" --notes-file "$RUNNER_TEMP/release-notes.md" --verify-tag
