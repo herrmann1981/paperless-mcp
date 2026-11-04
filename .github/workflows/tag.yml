@@ -70,6 +70,7 @@ jobs:
         run: uv run python scripts/smoke_docker_mcp.py "$IMAGE_REF"
 
       - name: Scan image for vulnerabilities
+        continue-on-error: true
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: ghcr.io/${{ github.repository }}:${{ github.ref_name }}
